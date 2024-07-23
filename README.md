@@ -24,9 +24,43 @@ git clone https://github.com/yourusername/healthcare-ci-pipeline.git
 cd healthcare-ci-pipeline
 ```
 
-## Usage
+## Integration
 
-After installation, integrate the CI pipeline into your project's existing CI/CD system. Refer to `docs/integration_guide.md` for detailed instructions.
+Integration within your project's CI system may differ depending on the platform and code development flow you use. All pipelines within this repo follow the structure below and should be straightforward to repurpose for your needs:
+
+```mermaid
+graph LR;
+  Build --> Test
+  Test --> Release
+  Release --> Production
+```
+
+```mermaid
+flowchart LR
+    A[Code Commit] -->|Trigger| B(Build)
+    B --> C{Security Scan}
+    C -->|Pass| D[Automated Test]
+    C -->|Fail| E[Review & Fix]
+    E --> C
+    D --> F{Test Pass?}
+    F -->|Yes| G[Deploy to Staging]
+    F -->|No| H[Fix Tests]
+    H --> D
+    G --> I{Staging Approval}
+    I -->|Yes| J[Deploy to Production]
+    I -->|No| K[Review & Adjust]
+    K --> G
+    J --> L[Monitor & Validate]
+
+    classDef default fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef passed fill:#bfa,stroke:#333,stroke-width:2px;
+    classDef failed fill:#fab,stroke:#333,stroke-width:2px;
+
+    class C,E,H,K failed;
+    class D,F,G,I,L passed;
+
+```
+
 
 ## Support
 
