@@ -12,6 +12,7 @@ This project is an open-source collection of Continuous Integration (CI) pipelin
 - **Automated Testing**: Supports unit, integration, and end-to-end testing.
 - **Documentation Generation**: Automatically generates compliance and technical documentation.
 - **Notification System**: Alerts for build status, security vulnerabilities, and compliance deviations.
+- **Free**: All pipelines are based on freely available tools up to certain usage thresholds.
 
 ## Getting Started
 
@@ -26,40 +27,57 @@ cd healthcare-ci-pipeline
 
 ## Integration
 
-Integration within your project's CI system may differ depending on the platform and code development flow you use. All pipelines within this repo follow the structure below and should be straightforward to repurpose for your needs:
+All pipelines within this repo implement standalone security checks that pass/fail and generate reports. The generic integration pattern looks as follows:
+
 
 ```mermaid
-graph LR;
-  Build --> Test
-  Test --> Release
-  Release --> Production
-```
+flowchart TB
+  Develop[Developer]
+  Commit[Push Changes]
+  Test[Security Check]
+  Report[Certificate]
+  Release[Release]
+  Pass[Check Passed]
+  subgraph SDLC
+    start[ ] --> Develop
+    Develop --> Commit
+    Commit --> Test
+    Test --> Pass
+    Pass --> Release
+    Pass --> Report
+  end
+  Test -->| Check Failed |Develop
 
-```mermaid
-flowchart LR
-    A[Code Commit] -->|Trigger| B(Build)
-    B --> C{Security Scan}
-    C -->|Pass| D[Automated Test]
-    C -->|Fail| E[Review & Fix]
-    E --> C
-    D --> F{Test Pass?}
-    F -->|Yes| G[Deploy to Staging]
-    F -->|No| H[Fix Tests]
-    H --> D
-    G --> I{Staging Approval}
-    I -->|Yes| J[Deploy to Production]
-    I -->|No| K[Review & Adjust]
-    K --> G
-    J --> L[Monitor & Validate]
-
-    classDef default fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef passed fill:#bfa,stroke:#333,stroke-width:2px;
-    classDef failed fill:#fab,stroke:#333,stroke-width:2px;
-
-    class C,E,H,K failed;
-    class D,F,G,I,L passed;
+  classDef empty fill:none,stroke-width:0px
+  class Pass empty
 
 ```
+
+Integration within your project's CI system may differ depending on the platform and code development flow you use.
+
+## List of Security Checks
+
+1. DSBOM
+2. API Testing
+3. Fuzzing
+
+## List of Platforms
+
+1. Github Actions
+2. Jenkins
+3. Gitlab CI
+4. Bitbucket Pipelines
+
+## List of Standards / Compliance
+
+1.
+
+## Support Matrix
+
+| Hi   | world |
+| ---- | ----- |
+| this | time  |
+
 
 
 ## Support
