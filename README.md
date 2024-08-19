@@ -1,6 +1,9 @@
 # Healthcare CI Pipelines
 
-## Overview
+<p align="center">
+  <img src="img/logo.png" alt="Your Logo" width="200" height="200">
+</p>
+
 
 This project is an open-source collection of Continuous Integration (CI) pipelines designed to streamline the development of secure and compliant healthcare software. This project provides CI pipeline configurations that automatically enforce security best practices and compliance standards pertinent to the healthcare industry. Our goal is to enable rapid integration, testing, and delivery of software that meets stringent regulatory requirements.
 
