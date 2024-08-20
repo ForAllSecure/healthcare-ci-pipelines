@@ -1,7 +1,7 @@
 # Healthcare CI Pipelines
 
 <p align="center">
-  <img src="img/logo.png" alt="Your Logo" width="200" height="200">
+  <img src="img/logo.png" alt="Healthcare CI Pipelines" width="200" height="200">
 </p>
 
 
@@ -56,46 +56,46 @@ flowchart TB
 
 ```
 
-Integration within your project's CI system may differ depending on the platform and code development flow you use.
+  Integration within your project's CI system may differ depending on the platform and code development flow you use.
+
 
 ## List of Security Checks
 
-1. DSBOM
-2. API Testing
-3. Fuzzing
+[FDA pre-market cybersecurity guidelines](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/cybersecurity-medical-devices-quality-system-considerations-and-content-premarket-submissions) for submission include vulnerability scanning as a requirement. Specifically, the categories:
 
-## List of Platforms
+1. Abuse or misuse cases, malformed and unexpected inputs;
+  - Robustness.
+  - Fuzz testing.
+2. Attack surface analysis;
+3. Vulnerability chaining;
+4. Closed box testing of known vulnerability scanning;
+5. Software composition analysis of binary executable files; and
+6. Static and dynamic code analysis, including testing for credentials that are "hardcoded," default, easily guessed, and easily compromised.
 
-1. Github Actions
-2. Jenkins
-3. Gitlab CI
-4. Bitbucket Pipelines
+In this repository we provide example pipelines that cover multiple categories above, including:
 
-## List of Standards / Compliance
+1. Software Composition Analysis (SCA) - Static scan, known vulnerability testing.
+2. API Testing - Dynamic analysis, unknown vulnerability detection, robustness and fuzz testing.
 
-1.
+## Pipeline Templates
 
-## Support Matrix
+Table of templates:
 
-| Hi   | world |
-| ---- | ----- |
-| this | time  |
+| Scan / CI   | Github Actions     | Bitbucket Pipelines | Gitlab CI |
+|-------------|--------------------|---------------------|-----------|
+| SCA         | :white_check_mark: | :white_check_mark:  |           |
+| API Testing | :white_check_mark: | :white_check_mark:  |           |
 
 
 
 ## Support
 
-For support, email `labs@forallsecure.com` or open an issue in the GitHub repository.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+For support, email `labs@mayhem.security` or open an issue in the GitHub repository.
 
 ## Contributing
 
 We welcome contributions from the community! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
-## Acknowledgments
+## License
 
-- Thanks to all the contributors who have helped shape this project.
-- Special thanks to healthcare professionals who provided insights into compliance needs.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
