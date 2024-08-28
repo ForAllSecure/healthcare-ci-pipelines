@@ -1,0 +1,127 @@
+## Scan a docker image -> get a SARIF/SBOM report
+
+name: Anchore
+
+on:
+  workflow_dispatch:
+    inputs:
+        docker_image:
+          description: 'The Docker image to scan'
+          required: true
+          default: 'appsecco/dvna:sqlite'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  SHA: ${{ github.event.pull_request.head.sha || github.event.after }}
+
+jobs:
+  anchore:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+    ## Optional: login if your image is private
+    #   - name: Login to Dockerhub
+    #     uses: docker/login-action@v3
+    #     with:
+    #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    #   - name: Login to GHCR
+    #     uses: docker/login-action@v3
+    #     with:
+    #       registry: ${{ env.REGISTRY }}
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pull the github input image or use the default
+      - name: Pull the image
+        run: docker pull ${{ github.event.inputs.docker_image }}
+
+      - name: Run the Anchore Grype scan action
+        uses: anchore/scan-action@v4
+        id: scan
+        with:
+          image: ${{ github.event.inputs.docker_image }}
+          fail-build: false
+          only-fixed: true
+          output-format: sarif
+          #severity-cutoff: critical
+
+      - name: Upload SARIF file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca_anchore.sarif
+          path: ${{ steps.scan.outputs.sarif }}
+
+      - name: Generate CycloneDX report
+        run: grype -o cyclonedx-json ${{ github.event.inputs.docker_image }} > sca_anchore.cyclonedx-json
+
+      - name: Upload SARIF file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca_anchore.cyclonedx-json
+          path: sca_anchore.cyclonedx-json
+
+      - name: Run the Anchore Syft sbom action
+        uses: anchore/sbom-action@v0
+        id: syft
+        with:
+          image: ${{ steps.meta.outputs.tags }}
+          format: spdx-json
+          output-file: sbom_anchore.spdx-json
+
+      - name: Upload SBOM file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom_anchore.spdx-json
+          path: sbom_anchore.spdx-json
+
+    #   - name: mdsbom action
+    #     uses: ethan42/mdsbom-action@a2c9192003073408ace2827352e7a40e70896e1e
+    #     with:
+    #       workspace: forallsecure
+    #       mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
+
+    #   - name: Run docker compose for a few seconds
+    #     run: timeout -s 2 40 docker compose -f docker-compose.yml -f overrides.yml up || true
+
+    #   - name: Generate DSBOM report
+    #     run: |
+    #       stat sbom_anchore.spdx-json && \
+    #       stat sca_anchore.cyclonedx-json && \
+    #       mdsbom report ${{ github.event.inputs.docker_image }} \
+    #       --workspace forallsecure \
+    #       --sca-report-source sca_anchore.cyclonedx-json \
+    #       --sbom-report-source sbom_anchore.spdx-json \
+    #       --sca-report-out sca_anchore_runtime.cyclonedx-json \
+    #       --sbom-report-out sbom_anchore_runtime.spdx-json
+
+    #   - name: Upload CycloneDX file as an artifact
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: sca_anchore_runtime.cyclonedx-json
+    #       path: sca_anchore_runtime.cyclonedx-json
+
+    #   - name: Upload SBOM file as an artifact
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: sbom_anchore_runtime.spdx-json
+    #       path: sbom_anchore_runtime.spdx-json
+
+      # Only available on Github Enterprise or public repositories
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+          category: Security/SCA

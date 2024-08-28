@@ -1,11 +1,14 @@
+# 🚧 Repository Under Construction 🚧
+
+This repository is currently under active development. Features and documentation may change frequently. Please check back later for updates!
+
 # Healthcare CI Pipelines
 
 <p align="center">
   <img src="img/logo.png" alt="Healthcare CI Pipelines" width="200" height="200">
 </p>
 
-
-This project is an open-source collection of Continuous Integration (CI) pipelines designed to streamline the development of secure and compliant healthcare software. This project provides CI pipeline configurations that automatically enforce security best practices and compliance standards pertinent to the healthcare industry. Our goal is to enable rapid integration, testing, and delivery of software that meets stringent regulatory requirements.
+This project is an open-source collection of Continuous Integration (CI) pipelines designed to streamline the development of secure and compliant healthcare software. This project provides CI pipeline configurations that enforce current security best practices and compliance standards. Our goal is to enable rapid integration, testing, and delivery of software that meets stringent regulatory requirements while actually improving the security of the software stack.
 
 ## Features
 
@@ -13,20 +16,9 @@ This project is an open-source collection of Continuous Integration (CI) pipelin
 - **Compliance as Code**: Ensures that every build adheres to predefined regulatory standards.
 - **Security Checks**: Integrates security scanning tools to detect vulnerabilities early.
 - **Automated Testing**: Supports unit, integration, and end-to-end testing.
-- **Documentation Generation**: Automatically generates compliance and technical documentation.
+- **Documentation Generation**: Automatically generates compliance reports in various formats.
 - **Notification System**: Alerts for build status, security vulnerabilities, and compliance deviations.
 - **Free**: All pipelines are based on freely available tools up to certain usage thresholds.
-
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-### Prerequisites
-
-```bash
-git clone https://github.com/yourusername/healthcare-ci-pipeline.git
-cd healthcare-ci-pipeline
-```
 
 ## Integration
 
@@ -56,16 +48,14 @@ flowchart TB
 
 ```
 
-  Integration within your project's CI system may differ depending on the platform and code development flow you use.
+Integration within your project's CI system may differ depending on the platform and code development flow you use.
 
 
 ## List of Security Checks
 
 [FDA pre-market cybersecurity guidelines](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/cybersecurity-medical-devices-quality-system-considerations-and-content-premarket-submissions) for submission include vulnerability scanning as a requirement. Specifically, the categories:
 
-1. Abuse or misuse cases, malformed and unexpected inputs;
-  - Robustness.
-  - Fuzz testing.
+1. Abuse or misuse cases, malformed and unexpected inputs; Robustness and Fuzz testing.
 2. Attack surface analysis;
 3. Vulnerability chaining;
 4. Closed box testing of known vulnerability scanning;
@@ -85,7 +75,6 @@ Table of templates:
 |-------------|--------------------|---------------------|-----------|
 | SCA         | :white_check_mark: | :white_check_mark:  |           |
 | API Testing | :white_check_mark: | :white_check_mark:  |           |
-
 
 
 ## Support
