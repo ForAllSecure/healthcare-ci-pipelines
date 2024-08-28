@@ -1,0 +1,91 @@
+## Scan a docker image -> get a SARIF/SBOM report
+
+name: SCA/Snyk
+
+on:
+  workflow_dispatch:
+    inputs:
+        docker_image:
+          description: 'The Docker image to scan'
+          required: true
+          default: 'appsecco/dvna:sqlite'
+
+# env:
+#   REGISTRY: ghcr.io
+#   IMAGE_NAME: ${{ github.repository }}
+#   SHA: ${{ github.event.pull_request.head.sha || github.event.after }}
+
+jobs:
+  anchore:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+    ## Optional: login if your image is private
+    #   - name: Login to Dockerhub
+    #     uses: docker/login-action@v3
+    #     with:
+    #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    #   - name: Login to GHCR
+    #     uses: docker/login-action@v3
+    #     with:
+    #       registry: ${{ env.REGISTRY }}
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pull the github input image or use the default
+      - name: Pull the image
+        run: docker pull ${{ github.event.inputs.docker_image }}
+
+      - name: Run Snyk to check Docker image for vulnerabilities
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ github.event.inputs.docker_image }}
+          args: --file=mayhem.dockerfile --sarif
+
+      - name: Upload SARIF file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca_snyk.sarif
+          path: snyk.sarif
+
+      - name: Run the Anchore Syft sbom action
+        uses: anchore/sbom-action@v0
+        id: syft
+        with:
+          image: ${{ github.event.inputs.docker_image }}
+          format: spdx-json
+          output-file: sbom_anchore.spdx-json
+
+      - name: Upload SBOM file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom_anchore.spdx-json
+          path: sbom_anchore.spdx-json
+
+      - name: Upload SARIF file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk.sarif
+          path: snyk.sarif
+
+      # Only available on Github Enterprise or public repositories
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+          category: Security/SCA
