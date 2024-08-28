@@ -77,7 +77,7 @@ jobs:
         uses: anchore/sbom-action@v0
         id: syft
         with:
-          image: ${{ steps.meta.outputs.tags }}
+          image: ${{ github.event.inputs.docker_image }}
           format: spdx-json
           output-file: sbom_anchore.spdx.json
           upload-artifact: false
