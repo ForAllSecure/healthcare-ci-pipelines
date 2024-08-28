@@ -63,7 +63,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: ${{ github.event.inputs.docker_image }}
-          format: 'json'
+          format: 'spdx-json'
           output: sca_trivy.spdx.json
 
       - name: Upload SARIF file as an artifact
