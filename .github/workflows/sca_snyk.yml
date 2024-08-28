@@ -48,6 +48,9 @@ jobs:
       - name: Pull the image
         run: docker pull ${{ github.event.inputs.docker_image }}
 
+      - name: Generate dockerfile to enable Snyk scan
+        run: echo "FROM ${{ github.event.inputs.docker_image }}" > Dockerfile
+
       - name: Run Snyk to check Docker image for vulnerabilities
         continue-on-error: true
         uses: snyk/actions/docker@master
@@ -55,6 +58,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ${{ github.event.inputs.docker_image }}
+          args: --file=Dockerfile
 
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
