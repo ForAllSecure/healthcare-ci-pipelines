@@ -84,3 +84,6 @@ jobs:
         with:
           sarif_file: sca_trivy.sarif
           category: Security/SCA
+
+      - name: SBOM upload
+        uses: advanced-security/spdx-dependency-submission-action@v0.1.1
