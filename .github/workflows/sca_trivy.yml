@@ -52,7 +52,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: ${{ github.event.inputs.docker_image }}
-          format: 'json'
+          format: 'sarif'
           output: sca_trivy.sarif
           #exit-code: '1'
           ignore-unfixed: true
