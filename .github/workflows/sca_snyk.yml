@@ -69,14 +69,14 @@ jobs:
         with:
           image: ${{ github.event.inputs.docker_image }}
           format: spdx-json
-          output-file: sbom_anchore.spdx-json
+          output-file: sbom_anchore.spdx.json
           upload-artifact: false
 
       - name: Upload SBOM file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom_anchore.spdx-json
-          path: sbom_anchore.spdx-json
+          name: sbom_anchore.spdx.json
+          path: sbom_anchore.spdx.json
 
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
@@ -90,3 +90,6 @@ jobs:
         with:
           sarif_file: snyk.sarif
           category: Security/SCA
+
+      - name: SBOM upload
+        uses: advanced-security/spdx-dependency-submission-action@v0.1.1

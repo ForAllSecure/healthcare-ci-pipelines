@@ -64,7 +64,7 @@ jobs:
         with:
           image-ref: ${{ github.event.inputs.docker_image }}
           format: 'json'
-          output: sca_trivy.sbom.json
+          output: sca_trivy.spdx.json
 
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
@@ -75,8 +75,8 @@ jobs:
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sca_trivy.sbom.json
-          path: sca_trivy.sbom.json
+          name: sca_trivy.spdx.json
+          path: sca_trivy.spdx.json
 
       # Only available on Github Enterprise or public repositories
       - name: Upload SARIF file
