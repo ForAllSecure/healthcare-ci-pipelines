@@ -78,5 +78,5 @@ jobs:
           sarif_file: sca_scout.sarif
           category: Security/SCA
 
-    #   - name: SBOM upload
-    #     uses: advanced-security/spdx-dependency-submission-action@v0.1.1
+      - name: SBOM upload
+        uses: advanced-security/spdx-dependency-submission-action@v0.1.1
