@@ -1,6 +1,6 @@
 ## Scan a docker image -> get a SARIF/SBOM report
 
-name: SCA/Anchore
+name: SCA/Trivy
 
 on:
   workflow_dispatch:
@@ -48,48 +48,39 @@ jobs:
       - name: Pull the image
         run: docker pull ${{ github.event.inputs.docker_image }}
 
-      - name: Run the Anchore Grype scan action
-        uses: anchore/scan-action@v4
-        id: scan
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.20.0
         with:
-          image: ${{ github.event.inputs.docker_image }}
-          fail-build: false
-          only-fixed: true
-          output-format: sarif
-          #severity-cutoff: critical
+          image-ref: ${{ github.event.inputs.docker_image }}
+          format: 'json'
+          output: sca_trivy.sarif
+          #exit-code: '1'
+          ignore-unfixed: true
+          # severity: 'CRITICAL,HIGH'
+          scanners: 'vuln'
+
+      - name: Run Trivy SBOM scanner
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ github.event.inputs.docker_image }}
+          format: 'json'
+          output: sca_trivy.sbom.json
 
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sca_anchore.sarif
-          path: ${{ steps.scan.outputs.sarif }}
-
-      - name: Generate CycloneDX report
-        run: grype -o cyclonedx-json ${{ github.event.inputs.docker_image }} > sca_anchore.cyclonedx-json
+          name: sca_trivy.sarif
+          path: sca_trivy.sarif
 
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sca_anchore.cyclonedx-json
-          path: sca_anchore.cyclonedx-json
-
-      - name: Run the Anchore Syft sbom action
-        uses: anchore/sbom-action@v0
-        id: syft
-        with:
-          image: ${{ steps.meta.outputs.tags }}
-          format: spdx-json
-          output-file: sbom_anchore.spdx-json
-
-      - name: Upload SBOM file as an artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom_anchore.spdx-json
-          path: sbom_anchore.spdx-json
+          name: sca_trivy.sbom.json
+          path: sca_trivy.sbom.json
 
       # Only available on Github Enterprise or public repositories
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
+          sarif_file: sca_trivy.sarif
           category: Security/SCA
