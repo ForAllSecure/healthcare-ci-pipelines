@@ -78,12 +78,6 @@ jobs:
           name: sbom_anchore.spdx.json
           path: sbom_anchore.spdx.json
 
-      - name: Upload SARIF file as an artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: snyk.sarif
-          path: snyk.sarif
-
       # Only available on Github Enterprise or public repositories
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3

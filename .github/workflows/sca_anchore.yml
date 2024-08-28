@@ -65,13 +65,13 @@ jobs:
           path: ${{ steps.scan.outputs.sarif }}
 
       - name: Generate CycloneDX report
-        run: grype -o cyclonedx-json ${{ github.event.inputs.docker_image }} > sca_anchore.cyclonedx-json
+        run: grype -o cyclonedx-json ${{ github.event.inputs.docker_image }} > sca_anchore.cyclonedx.json
 
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sca_anchore.cyclonedx-json
-          path: sca_anchore.cyclonedx-json
+          name: sca_anchore.cyclonedx.json
+          path: sca_anchore.cyclonedx.json
 
       - name: Run the Anchore Syft sbom action
         uses: anchore/sbom-action@v0
