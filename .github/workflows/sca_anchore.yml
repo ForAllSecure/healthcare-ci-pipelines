@@ -22,6 +22,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
+      dependency-graph: write
 
     steps:
       - name: Checkout code
