@@ -66,6 +66,9 @@ jobs:
           name: sca_snyk.sarif
           path: snyk.sarif
 
+      - name: Normalize SARIF security scores (avoid "null")
+        run: sed -i 's/"security-severity": "null"/"security-severity": "1"/g' snyk.sarif
+
       - name: Run the Anchore Syft sbom action
         uses: anchore/sbom-action@v0
         id: syft
