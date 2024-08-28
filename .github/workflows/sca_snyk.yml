@@ -55,7 +55,6 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ${{ github.event.inputs.docker_image }}
-          args: --sarif
 
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
