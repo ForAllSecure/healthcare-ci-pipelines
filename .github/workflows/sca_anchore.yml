@@ -80,6 +80,7 @@ jobs:
           image: ${{ steps.meta.outputs.tags }}
           format: spdx-json
           output-file: sbom_anchore.spdx.json
+          upload-artifact: false
 
       - name: Upload SBOM file as an artifact
         uses: actions/upload-artifact@v4

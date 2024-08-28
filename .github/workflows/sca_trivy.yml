@@ -16,10 +16,10 @@ on:
 #   SHA: ${{ github.event.pull_request.head.sha || github.event.after }}
 
 jobs:
-  anchore:
+  trivy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
       security-events: write
 
