@@ -19,10 +19,9 @@ jobs:
   anchore:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
       security-events: write
-      dependency-graph: write
 
     steps:
       - name: Checkout code
