@@ -2,7 +2,6 @@
 
 This repository is currently under active development. Features and documentation may change frequently. Please check back later for updates!
 
-# Healthcare CI Pipelines
 # Ready-To-Go Healthcare CI Pipelines
 
 <p align="center">
@@ -48,29 +47,6 @@ flowchart TB
 
 ```
 
-
-```mermaid
-flowchart TB
-  Develop[Developer]
-  Commit[Push Changes]
-  Test[Security Check]
-  Report[Certificate]
-  Release[Release]
-  Pass[Check Passed]
-  subgraph SDLC
-    start[ ] --> Develop
-    Develop --> Commit
-    Commit --> Test
-    Test --> Pass
-    Pass --> Release
-    Pass --> Report
-  end
-  Test -->| Check Failed |Develop
-
-  classDef empty fill:none,stroke-width:0px
-  class Pass empty
-
-```
 
 Integration within your project's CI system may differ depending on the platform and code development flow you use.
 
