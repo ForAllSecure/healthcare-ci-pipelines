@@ -1,7 +1,6 @@
-## Scan a docker image -> get a SARIF/SBOM report based on
-## what is actually referenced at runtime.
+## Scan a docker image -> get a SARIF/SBOM report
 
-name: Dynamic SBOM/SCA Anchore
+name: SBOM/SCA Scout
 
 on:
   workflow_dispatch:
@@ -28,12 +27,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-    ## Optional: login if your image is private
-    #   - name: Login to Dockerhub
-    #     uses: docker/login-action@v3
-    #     with:
-    #       username: ${{ secrets.DOCKERHUB_USERNAME }}
-    #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to Dockerhub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     #   - name: Login to GHCR
     #     uses: docker/login-action@v3
@@ -46,24 +44,17 @@ jobs:
       - name: Pull the image
         run: docker pull ${{ github.event.inputs.docker_image }}
 
-      - name: Run the Anchore Grype scan action
-        uses: anchore/scan-action@v4
-        id: scan
+      - name: Docker Scout
+        uses: docker/scout-action@v1
         with:
+          command: cves,recommendations,compare,sbom
           image: ${{ github.event.inputs.docker_image }}
-          fail-build: false
-          only-fixed: true
-          output-format: sarif
-          #severity-cutoff: critical
-
-      - name: Run the Anchore Syft sbom action
-        uses: anchore/sbom-action@v0
-        id: syft
-        with:
-          image: ${{ github.event.inputs.docker_image }}
-          format: spdx-json
-          output-file: sbom_anchore.spdx.json
-          upload-artifact: false
+          #only-severities: critical,high # only show critical and high CVEs
+          #only-fixed: true # filter to fixed CVEs
+          exit-code: false  # fail or not based on CVEs found?
+          sarif-file: sca_scout.sarif
+          output: sbom_scout.spdx.json
+          format: spdx
 
       - name: mdsbom action
         uses: ethan42/mdsbom-action@a2c9192003073408ace2827352e7a40e70896e1e
@@ -77,24 +68,35 @@ jobs:
       - name: Pause to let mdsbom sync state
         run: sleep 30
 
-      - name: Generate Dynamic SBOM/SCA reports
+      - name: Generate DSBOM report
         run: |
-          mdsbom anchore ${{ github.event.inputs.docker_image }} \
+          stat sbom_scout.spdx && \
+          stat sca_scout.sarif && \
+          mdsbom report ${{ github.event.inputs.docker_image }} \
           --workspace forallsecure \
-          --sca-report-out dynamic_sca_anchore.cyclonedx.json \
-          --sbom-report-out dynamic_sbom_anchore.spdx.json
+          --sca-report-source sca_scout.sarif \
+          --sbom-report-source sbom_scout.spdx \
+          --sca-report-out dynamic_sca_scout.sarif \
+          --sbom-report-out dynamic_sbom_scout.spdx
 
       - name: Upload SBOM file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dynamic_sbom_anchore.spdx.json
-          path: dynamic_sbom_anchore.spdx.json
+          name: dynamic_sbom_scout.spdx.json
+          path: dynamic_sbom_scout.spdx.json
 
-      - name: Upload CyloneDX SCA report as an artifact
+      - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dynamic_sca_anchore.cyclonedx.json
-          path: dynamic_sca_anchore.cyclonedx.json
+          name: dynamic_sca_scout.sarif
+          path: dynamic_sca_scout.sarif
+
+      # Only available on Github Enterprise or public repositories
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: dynamic_sca_scout.sarif
+          category: Security/SCA
 
       - name: SBOM upload
         uses: advanced-security/spdx-dependency-submission-action@v0.1.1
