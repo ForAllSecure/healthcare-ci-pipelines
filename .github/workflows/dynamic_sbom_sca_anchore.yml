@@ -1,4 +1,5 @@
-## Scan a docker image -> get a SARIF/SBOM report
+## Scan a docker image -> get a SARIF/SBOM report based on
+## what is actually referenced at runtime.
 
 name: Dynamic SBOM/SCA Anchore
 

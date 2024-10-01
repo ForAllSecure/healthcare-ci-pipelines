@@ -1,6 +1,6 @@
 ## Scan a docker image -> get a SARIF/SBOM report
 
-name: SCA/Snyk
+name: SBOM/SCA Snyk
 
 on:
   workflow_dispatch:
