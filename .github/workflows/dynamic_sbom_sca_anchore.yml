@@ -72,7 +72,7 @@ jobs:
           mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
 
       - name: Run software package for 10 seconds
-        run: timeout -s 2 10 docker run -it ${{ github.event.inputs.docker_image }} || true
+        run: timeout -s 9 10 docker run -i ${{ github.event.inputs.docker_image }} || true
 
       - name: Generate Dynamic SBOM/SCA reports
         run: |
