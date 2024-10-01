@@ -72,7 +72,7 @@ jobs:
           mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
 
       - name: Run software package for 10 seconds
-        run: timeout -s 2 10 docker -it ${{ github.event.inputs.docker_image }} || true
+        run: timeout -s 2 10 docker run -it ${{ github.event.inputs.docker_image }} || true
 
       - name: Generate Dynamic SBOM/SCA reports
         run: |
@@ -81,9 +81,9 @@ jobs:
           mdsbom report ${{ github.event.inputs.docker_image }} \
           --workspace forallsecure \
           --sca-report-source ${{ steps.scan.outputs.sarif }} \
-          --sbom-report-source sbom_anchore.spdx-json \
+          --sbom-report-source sbom_anchore.spdx.json \
           --sca-report-out dynamic_sca_anchore.sarif \
-          --sbom-report-out dynamic_sbom_anchore.spdx-json
+          --sbom-report-out dynamic_sbom_anchore.spdx.json
 
       - name: Upload SBOM file as an artifact
         uses: actions/upload-artifact@v4
