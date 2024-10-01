@@ -74,6 +74,9 @@ jobs:
       - name: Run software package for 10 seconds
         run: timeout -s 9 10 docker run -i ${{ github.event.inputs.docker_image }} || true
 
+      - name: Pause to let mdsbom sync state
+        run: sleep 30
+
       - name: Generate Dynamic SBOM/SCA reports
         run: |
           stat sbom_anchore.spdx.json && \
@@ -84,9 +87,6 @@ jobs:
           --sbom-report-source sbom_anchore.spdx.json \
           --sca-report-out dynamic_sca_anchore.sarif \
           --sbom-report-out dynamic_sbom_anchore.spdx.json
-
-      - name: Pause to let mdsbom sync state
-        run: sleep 30
 
       - name: Upload SBOM file as an artifact
         uses: actions/upload-artifact@v4
