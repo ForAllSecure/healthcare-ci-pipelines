@@ -81,7 +81,7 @@ jobs:
         run: |
           mdsbom anchore ${{ github.event.inputs.docker_image }} \
           --workspace forallsecure \
-          --sca-report-out dynamic_sca_anchore.sarif \
+          --sca-report-out dynamic_sca_anchore.cyclonedx.json \
           --sbom-report-out dynamic_sbom_anchore.spdx.json
 
       - name: Upload SBOM file as an artifact
@@ -90,18 +90,11 @@ jobs:
           name: dynamic_sbom_anchore.spdx.json
           path: dynamic_sbom_anchore.spdx.json
 
-      - name: Upload SARIF file as an artifact
+      - name: Upload CyloneDX SCA report as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dynamic_sca_anchore.sarif
-          path: dynamic_sca_anchore.sarif
-
-      # Only available on Github Enterprise or public repositories
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: dynamic_sca_anchore.sarif
-          category: Security/SCA
+          name: dynamic_sca_anchore.cyclonedx.json
+          path: dynamic_sca_anchore.cyclonedx.json
 
       - name: SBOM upload
         uses: advanced-security/spdx-dependency-submission-action@v0.1.1
