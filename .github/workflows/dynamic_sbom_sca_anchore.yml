@@ -85,6 +85,9 @@ jobs:
           --sca-report-out dynamic_sca_anchore.sarif \
           --sbom-report-out dynamic_sbom_anchore.spdx.json
 
+      - name: Pause to let mdsbom sync state
+        run: sleep 30
+
       - name: Upload SBOM file as an artifact
         uses: actions/upload-artifact@v4
         with:
