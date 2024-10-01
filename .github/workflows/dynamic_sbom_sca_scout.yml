@@ -70,14 +70,14 @@ jobs:
 
       - name: Generate DSBOM report
         run: |
-          stat sbom_scout.spdx && \
+          stat sbom_scout.spdx.json && \
           stat sca_scout.sarif && \
           mdsbom report ${{ github.event.inputs.docker_image }} \
           --workspace forallsecure \
           --sca-report-source sca_scout.sarif \
-          --sbom-report-source sbom_scout.spdx \
+          --sbom-report-source sbom_scout.spdx.json \
           --sca-report-out dynamic_sca_scout.sarif \
-          --sbom-report-out dynamic_sbom_scout.spdx
+          --sbom-report-out dynamic_sbom_scout.spdx.json
 
       - name: Upload SBOM file as an artifact
         uses: actions/upload-artifact@v4
