@@ -79,12 +79,8 @@ jobs:
 
       - name: Generate Dynamic SBOM/SCA reports
         run: |
-          stat sbom_anchore.spdx.json && \
-          stat ${{ steps.scan.outputs.sarif }} && \
-          mdsbom report ${{ github.event.inputs.docker_image }} \
+          mdsbom anchore ${{ github.event.inputs.docker_image }} \
           --workspace forallsecure \
-          --sca-report-source ${{ steps.scan.outputs.sarif }} \
-          --sbom-report-source sbom_anchore.spdx.json \
           --sca-report-out dynamic_sca_anchore.sarif \
           --sbom-report-out dynamic_sbom_anchore.spdx.json
 
