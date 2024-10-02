@@ -49,23 +49,14 @@ jobs:
         run: |
           sudo apt update && sudo apt install -y golang-go wget && wget https://github.com/opencontainers/umoci/releases/download/v0.4.7/umoci.amd64 -O umoci && chmod +x umoci && sudo mv umoci /usr/local/bin/
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ${{ github.event.inputs.docker_image }}
-          format: 'sarif'
-          output: sca_trivy.sarif
-          #exit-code: '1'
-          ignore-unfixed: false
-          # severity: 'CRITICAL,HIGH'
-          scanners: 'vuln'
+      - name: Install Trivy
+        run: |
+          sudo apt-get install wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
 
-      - name: Run Trivy SBOM scanner
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ${{ github.event.inputs.docker_image }}
-          format: 'spdx-json'
-          output: sca_trivy.spdx.json
 
       - name: mdsbom action
         uses: ethan42/mdsbom-action@a2c9192003073408ace2827352e7a40e70896e1e
