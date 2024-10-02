@@ -1,0 +1,105 @@
+## Scan a docker image -> get a SARIF/SBOM report
+
+name: SBOM/SCA Trivy
+
+on:
+  workflow_dispatch:
+    inputs:
+        docker_image:
+          description: 'The Docker image to scan'
+          required: true
+          default: 'appsecco/dvna:sqlite'
+
+# env:
+#   REGISTRY: ghcr.io
+#   IMAGE_NAME: ${{ github.repository }}
+#   SHA: ${{ github.event.pull_request.head.sha || github.event.after }}
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+    ## Optional: login if your image is private
+    #   - name: Login to Dockerhub
+    #     uses: docker/login-action@v3
+    #     with:
+    #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    #   - name: Login to GHCR
+    #     uses: docker/login-action@v3
+    #     with:
+    #       registry: ${{ env.REGISTRY }}
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pull the github input image or use the default
+      - name: Pull the image
+        run: docker pull ${{ github.event.inputs.docker_image }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ github.event.inputs.docker_image }}
+          format: 'sarif'
+          output: sca_trivy.sarif
+          #exit-code: '1'
+          ignore-unfixed: true
+          # severity: 'CRITICAL,HIGH'
+          scanners: 'vuln'
+
+      - name: Run Trivy SBOM scanner
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ github.event.inputs.docker_image }}
+          format: 'spdx-json'
+          output: sca_trivy.spdx.json
+
+      - name: mdsbom action
+        uses: ethan42/mdsbom-action@a2c9192003073408ace2827352e7a40e70896e1e
+        with:
+          workspace: forallsecure
+          mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
+
+      - name: Run software package for 10 seconds
+        run: timeout -s 9 10 docker run -i ${{ github.event.inputs.docker_image }} || true
+
+      - name: Pause to let mdsbom sync state
+        run: sleep 30
+
+      - name: Generate Dynamic SBOM/SCA reports
+        run: |
+          mdsbom trivy ${{ github.event.inputs.docker_image }} \
+          --workspace forallsecure \
+          --sca-report-out dynamic_sca_trivy.sarif \
+          --sbom-report-out dynamic_sbom_trivy.spdx.json
+
+      - name: Upload SARIF file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dynamic_sca_trivy.sarif
+          path: dynamic_sca_trivy.sarif
+
+      - name: Upload SARIF file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dynamic_sca_trivy.spdx.json
+          path: dynamioc_sca_trivy.spdx.json
+
+      # Only available on Github Enterprise or public repositories
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: dynamic_sca_trivy.sarif
+          category: Security/SCA
+
+      - name: SBOM upload
+        uses: advanced-security/spdx-dependency-submission-action@v0.1.1
