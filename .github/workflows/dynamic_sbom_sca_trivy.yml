@@ -45,6 +45,10 @@ jobs:
       - name: Pull the image
         run: docker pull ${{ github.event.inputs.docker_image }}
 
+      - name: Install umoci
+        run: |
+          sudo apt update && sudo apt install -y golang-go wget && wget https://github.com/opencontainers/umoci/releases/download/v0.4.7/umoci.amd64 -O umoci && chmod +x umoci && sudo mv umoci /usr/local/bin/
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.20.0
         with:
