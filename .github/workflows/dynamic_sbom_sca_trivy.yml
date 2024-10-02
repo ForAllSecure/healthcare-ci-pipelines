@@ -52,7 +52,7 @@ jobs:
           format: 'sarif'
           output: sca_trivy.sarif
           #exit-code: '1'
-          ignore-unfixed: true
+          ignore-unfixed: false
           # severity: 'CRITICAL,HIGH'
           scanners: 'vuln'
 
