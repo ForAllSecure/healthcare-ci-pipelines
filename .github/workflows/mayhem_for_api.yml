@@ -1,0 +1,56 @@
+## Scan an API -> get a SARIF report
+
+name: API Testing Mayhem
+
+on:
+  workflow_dispatch:
+    inputs:
+        api_url:
+            description: 'The URL of the API to scan'
+            required: true
+            default: 'https://demo-api.mayhem.security/api/v3'
+        api_spec:
+            description: 'The OpenAPI spec of the API to scan'
+            required: true
+            default: 'https://demo-api.mayhem.security/api/v3/openapi.json'
+
+jobs:
+  mayhem:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      security-events: write
+
+    steps:
+
+      - name: Run Mayhem for API to check for vulnerabilities
+        uses: ForAllSecure/mapi-action@v2
+        continue-on-error: true
+        with:
+          mayhem-url: https://app.mayhem.security
+          mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
+          api-url: ${{ inputs.api_url }}
+          api-spec: ${{ inputs.api_spec}}
+          sarif-report: mapi.sarif
+          html-report: mapi.html
+          target: forallsecure/healthcare-ci-pipelines/api
+
+      # Archive HTML report
+      - name: Archive Mayhem for API report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mapi.html
+          path: mapi.html
+
+      # Upload SARIF file (only available on public repos or github enterprise)
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: mapi.sarif
+
+      # Only available on Github Enterprise or public repositories
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: mapi.sarif
+          category: Security/SCA
