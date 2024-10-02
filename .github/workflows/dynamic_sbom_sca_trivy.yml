@@ -79,27 +79,17 @@ jobs:
         run: |
           mdsbom trivy ${{ github.event.inputs.docker_image }} \
           --workspace forallsecure \
-          --sca-report-out dynamic_sca_trivy.sarif \
-          --sbom-report-out dynamic_sbom_trivy.spdx.json
+          --sca-summary-csv dynamic_sca_trivy.csv \
+          --sbom-summary-csv dynamic_sbom_trivy.csv
 
-      - name: Upload SARIF file as an artifact
+      - name: Upload SCA file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dynamic_sca_trivy.sarif
-          path: dynamic_sca_trivy.sarif
+          name: dynamic_sca_trivy.csv
+          path: dynamic_sca_trivy.csv
 
-      - name: Upload SARIF file as an artifact
+      - name: Upload SBOM file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dynamic_sca_trivy.spdx.json
-          path: dynamioc_sca_trivy.spdx.json
-
-      # Only available on Github Enterprise or public repositories
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: dynamic_sca_trivy.sarif
-          category: Security/SCA
-
-      - name: SBOM upload
-        uses: advanced-security/spdx-dependency-submission-action@v0.1.1
+          name: dynamic_sca_trivy.csv
+          path: dynamioc_sca_trivy.csv
