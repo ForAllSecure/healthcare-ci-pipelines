@@ -1,8 +1,13 @@
 name: Release PDFs
 
+# trigger on every release, manual trigger and push to main
+
 on:
   release:
     types: [published]
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
