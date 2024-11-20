@@ -1,6 +1,3 @@
-# 🚧 Repository Under Construction 🚧
-
-This repository is currently under active development. Features and documentation may change frequently. Please check back later for updates!
 
 # Ready-To-Go Healthcare CI Pipelines
 
@@ -8,7 +5,12 @@ This repository is currently under active development. Features and documentatio
   <img src="img/logo.png" alt="Healthcare CI Pipelines" width="200" height="200">
 </p>
 
-This project is an open-source collection of Continuous Integration (CI) pipelines designed to streamline the development of secure and compliant healthcare software. The project provides CI pipeline configurations that enforce current security best practices and compliance standards. Our goal is to enable rapid integration, testing, and delivery of software that meets stringent regulatory requirements while actually improving the security of the software stack.
+This project is an open-source collection of Continuous Integration (CI) pipelines
+designed to streamline the development of secure and compliant healthcare software.
+The project provides CI pipeline configurations that enforce current security best
+practices and compliance standards. Our goal is to enable rapid integration, testing,
+and delivery of software that meets stringent regulatory requirements while actually
+improving the security of the software stack.
 
 ## Salient Features
 
@@ -22,7 +24,8 @@ This project is an open-source collection of Continuous Integration (CI) pipelin
 
 ## Integration
 
-All pipelines within this repo implement standalone security checks that pass/fail and generate reports. The generic integration pattern looks as follows:
+All pipelines within this repo implement standalone security checks that pass/fail
+and generate reports. The generic integration pattern looks as follows:
 
 ```mermaid
 flowchart TB
