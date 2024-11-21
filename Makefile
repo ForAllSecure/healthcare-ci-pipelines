@@ -30,9 +30,12 @@ $(BUILD_FOLDER)/%.pdf: $(BUILD_FOLDER) README-out.md
 		-v $(shell pwd):/data \
 		ghcr.io/ethan42/pandoctex \
 		pandoc README-out.md -f gfm -s \
-		--pdf-engine=xelatex \
+		-H ./docs/preamble.tex \
+		--pdf-engine=pdflatex \
 		-o "$(BUILD_FOLDER)/$*.pdf" \
-		-V mainfont="Linux Libertine O" \
-		-V monofont="Noto Mono" \
 		-V fontsize=12pt \
 		-V colorlinks=true -V linkcolor=darkgray -V urlcolor=blue -V toccolor=gray
+
+.PHONY: clean
+clean:
+	rm -rf $(BUILD_FOLDER) README-out.md
