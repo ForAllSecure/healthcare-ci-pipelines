@@ -1,0 +1,21 @@
+# Scan an API -> get a SARIF report
+
+pipelines:
+  custom:
+    api-testing:
+      - step:
+          name: 'API Security Testing'
+          script:
+            # Install the Mayhem CLI
+            - curl -O https://app.mayhem.security/cli/mapi/linux-musl/latest/mapi && chmod +x ./mapi
+            # Login
+            - ./mapi --mayhem-url https://app.mayhem.security login $MAYHEM_TOKEN
+            # Run Mayhem and generate SARIF and JUnit reports
+            - ./mapi run forallsecure/bitbucket-example/api 60s $API_SPEC --url $API_URL --sarif api_mayhem.sarif --junit api_mayhem.junit
+          # Store results as artifacts
+          artifacts:
+            - api_mayhem.sarif
+            - api_mayhem.junit
+          test:
+            reports:
+              junit: api_mayhem.junit
