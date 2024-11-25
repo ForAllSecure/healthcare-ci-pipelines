@@ -1,0 +1,24 @@
+# Scan a docker image -> get a SBOM/SCA report with Trivy + Mayhem
+
+pipelines:
+  custom:
+    dynamic-sbom-sca-trivy-mayhem:
+      - step:
+          name: 'Dynamic SBOM'
+          image: ethan42/mdsbom:1
+          script:
+            - sleep 5  # wait for docker daemon to come up
+            - docker ps
+            - echo -e '[sync]\n    api_token = "'$MAYHEM_TOKEN'"\n    upstream_url = "https://app.mayhem.security"\n    workspace = "forallsecure"\n' > /etc/mdsbom/config.toml
+            - mdsbom --version
+            # Login to Mayhem
+            - mdsbom login $MAYHEM_URL $MAYHEM_TOKEN
+            # Run the target image for 10 seconds
+            - timeout -s 2 10 docker run --rm $TARGET_IMAGE
+            - sleep 30
+            # Generate Dynamic SBOM/SCA reports
+            - mdsbom trivy $TARGET_IMAGE --workspace forallsecure --sca-summary-csv dynamic_sbom_sca_trivy_mayhem.csv --sbom-summary-csv dynamic_sbom_sca_trivy.csv
+          artifacts:
+            - dynamic_sbom_sca_trivy_mayhem.csv
+            - dynamic_sbom_sca_trivy.csv
+

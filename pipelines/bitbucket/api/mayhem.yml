@@ -2,9 +2,9 @@
 
 pipelines:
   custom:
-    api-testing:
+    api-mayhem:
       - step:
-          name: 'API Security Testing'
+          name: 'API Testing with Mayhem'
           script:
             # Install the Mayhem CLI
             - curl -O https://app.mayhem.security/cli/mapi/linux-musl/latest/mapi && chmod +x ./mapi
