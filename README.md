@@ -21,7 +21,7 @@ improving the security of the software stack.
 |--------------|---|--------------------|--------------|---------------------|
 | SBOM/SCA     |   | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/github/sbom) $\checkmark$ | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/gitlab/sbom) $\checkmark$ | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/bitbucket/sbom) $\checkmark$ |
 | API Testing  |   | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/github/api) $\checkmark$  | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/gitlab/api)  $\checkmark$ | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/bitbucket/api)  $\checkmark$ |
-| Fuzz Testing |   | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/github/fuzz) $\checkmark$ | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/gitlab/fuzz) $\checkmark$ | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/bitbucket/fuzz) $\checkmark$ |
+| Fuzz Testing |   | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/github/fuzz) $\checkmark$ | [GO](https://github.com/forallsecure/healthcare-ci-pipelines/tree/main/pipelines/gitlab/fuzz) $\checkmark$ |  |
 
 ## Architecture
 
