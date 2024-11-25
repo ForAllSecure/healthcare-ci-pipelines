@@ -39,7 +39,7 @@ flowchart LR
 ## Artifact Formats
 
 We typically produce artifacts in two main formats: SPDX and SARIF
-(unless unsupported by the security check used).
+(unless unsupported by the security check/CI platform used).
 
 **Software Package Data Exchange (SPDX)**. SPDX is an open standard for communicating SBOM information,
 including components, licenses, copyright, and security references. It is part part of the Linux
@@ -71,7 +71,7 @@ Our pipelines currently cover three categories of security checks:
 3. Code Fuzz Testing (CFT). Dynamic analysis for unknown vulnerability detection,
    robustness checking and coverage-guided fuzz testing of code.
 
-The selection above is not random, they categories above implement pipelines to meet
+The selection above is not random, the categories above implement pipelines to meet
 [FDA pre-market cybersecurity guidelines](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/cybersecurity-medical-devices-quality-system-considerations-and-content-premarket-submissions)
 for submissions that have vulnerability scanning as a requirement. Specifically, we cover the categories:
 
@@ -79,7 +79,7 @@ for submissions that have vulnerability scanning as a requirement. Specifically,
 2. Attack surface analysis; (SBOM/SCA)
 3. Closed box testing of known vulnerability scanning; (SBOM/SCA)
 4. Software composition analysis of binary executable files; and (SBOM/SCA)
-5. Static and dynamic code analysis, including testing for credentials that are "hardcoded," default, easily guessed, and easily compromised. (AST/CFT)
+5. Static and dynamic code analysis, including testing for credentials that are "hardcoded," default, easily guessed, and easily compromised. (SBOM/SCA/AST/CFT)
 
 Clean artifacts from the scanning pipelines above can be used as evidence for a team's FDA submission.
 
