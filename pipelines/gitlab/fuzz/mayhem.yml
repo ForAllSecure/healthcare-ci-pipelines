@@ -1,0 +1,37 @@
+# Fuzz a Docker image -> Get a SARIF/Junit report using Mayhem
+
+stages:
+    - scan
+
+fuzz-mayhem:
+    stage: scan
+    image: golang:latest  # or other example image being tested
+    script:
+        # Install dependencies
+        - apt-get update -qq && apt-get install -y -qq curl  # or other dependencies
+        - curl --no-progress-meter -Lo mayhem ${MAYHEM_URL}/cli/Linux/mayhem && chmod +x mayhem
+        # Build target
+        - make
+        # Login
+        - ./mayhem login $MAYHEM_URL $MAYHEM_TOKEN
+        # Package the target and starting testsuite
+        - ./mayhem package gitlab-fuzzing-example/vulnerable -o package
+        - cp gitlab-fuzzing-example/inputs/* package/testsuite/ && cp gitlab-fuzzing-example/Mayhemfile package/
+        # Run Mayhem and generate SARIF and JUnit reports
+        - ./mayhem run package --duration 60 --ci-url $CI_SERVER_URL --scm-merge-base-branch ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-""} --branch-name $CI_COMMIT_REF_NAME --revision $CI_COMMIT_SHA > /tmp/run
+        - ./mayhem wait $(cat /tmp/run) --sarif fuzz_mayhem.sarif --junit fuzz_mayhem.junit
+        # every path in the CI starts with the path /builds/group/project, sed it out
+        - sed -i 's|builds/[^/]\+/[^/]\+/||g' fuzz_mayhem.sarif
+        # Convert SARIF to GitLab SAST format
+        - curl -Lo sarif-converter https://gitlab.com/ignis-build/sarif-converter/-/releases/permalink/latest/downloads/bin/sarif-converter-linux && chmod +x sarif-converter
+        - ./sarif-converter --type sast fuzz_mayhem.sarif gl-fuzz-mayhem-sast.json || true
+
+    artifacts:
+        paths:
+          - gl-fuzz-mayhem-sast.json
+          - fuzz_mayhem.sarif
+          - fuzz_mayhem.junit
+        reports:
+            sast: gl-fuzz-mayhem-sast.json
+            junit: fuzz_mayhem.junit
+

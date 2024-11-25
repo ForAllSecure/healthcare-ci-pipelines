@@ -1,0 +1,35 @@
+# Scan an API -> get a SARIF/Junit report
+
+stages:
+    - scan
+
+variables:
+    # Define the target API to scan
+    TARGET_API: "https://demo-api.mayhem.security/api/v3"
+    TARGET_API_SPEC: "https://demo-api.mayhem.security/api/v3/openapi.json"
+
+api-mayhem:
+    image: docker:latest
+    services:
+        - docker:dind
+    stage: scan
+    script:
+        # Install dependencies
+        - apt update && apt install -fy curl
+        # Install the Mayhem CLI
+        - curl -Lo mapi https://app.mayhem.security/cli/mapi/linux-musl/latest/mapi && chmod +x mapi
+        # Login
+        - ./mapi login $MAYHEM_TOKEN
+        # Run Mayhem and generate SARIF and JUnit reports
+        - ./mapi run forallsecure/gitlab/openapi-example 60s $TARGET_API_SPEC --url $TARGET_API --sarif api_mayhem.sarif --junit api_mayhem.junit --scm-branch $CI_COMMIT_REF_NAME --scm-commit-sha $CI_COMMIT_SHA --scm-remote $CI_REPOSITORY_URL
+        # Convert SARIF to GitLab SAST format
+        - curl -Lo sarif-converter https://gitlab.com/ignis-build/sarif-converter/-/releases/permalink/latest/downloads/bin/sarif-converter-linux && chmod +x sarif-converter
+        - ./sarif-converter --type sast api_mayhem.sarif gl-api-mayhem-sast.json
+    artifacts:
+        paths:
+            - gl-api-mayhem-sast.json
+            - api_mayhem.junit
+            - api_mayhem.sarif
+        reports:
+            sast: gl-api-mayhem-sast.json
+            junit: api-mayhem.junit

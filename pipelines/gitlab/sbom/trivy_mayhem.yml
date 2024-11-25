@@ -1,0 +1,39 @@
+# Scan a docker image -> get a Dynamic SBOM/SCA report with Trivy + Mayhem
+# Use custom postprocessing script to insert observation data
+# into custom GitLab Container Scanning report format
+
+stages:
+    - scan
+
+variables:
+    # Define the target image to scan
+    TARGET_IMAGE: "redis:latest"
+
+sbom-sca-trivy-mayhem:
+    stage: scan
+    # Example base image with mdsbom CLI installed
+    image: ethan42/mdsbom:1
+    script:
+        # Enable Mayhem DSBOM syncing
+        - echo -e '[sync]\n    api_token = "'$MAYHEM_TOKEN'"\n    upstream_url = "'$MAYHEM_URL'"\n    workspace = "forallsecure"\n' > /etc/mdsbom/config.toml
+        - apk add python3
+        # Allow service to start
+        - sleep 5
+        # Generate Trivy report
+        - trivy image --format template --template "@gitlab.tpl" -o trivy.json redis:latest
+        # Login to Mayhem
+        - mdsbom login $MAYHEM_URL $MAYHEM_TOKEN
+        # Run redis service
+        - timeout -s 2 10 docker run --rm $TARGET_IMAGE
+        - sleep 30
+        # Generate Dynamic SBOM/SCA reports
+        - mdsbom trivy $TARGET_IMAGE --workspace forallsecure --sca-summary-csv dynamic_sca_trivy.csv --sbom-summary-csv dynamic_sbom_trivy.csv
+        # Postprocess Trivy report to mark remediated vulnerabilities
+        - ./postprocess.py trivy.json dynamic_sca_trivy.csv gl-container-scanning-report.json
+    artifacts:
+        paths:
+            - dynamic_sca_trivy.csv
+            - dynamic_sbom_trivy.csv
+            - gl-container-scanning-report.json
+        reports:
+            container_scanning: gl-container-scanning-report.json
