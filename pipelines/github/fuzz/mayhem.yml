@@ -1,0 +1,73 @@
+# Scan a container -> get a SARIF report
+
+name: Fuzz Testing with Mayhem
+
+on:
+  workflow_dispatch:
+    inputs:
+        docker_image:
+          description: 'The Docker image to scan'
+          required: true
+          default: 'forallsecure/lighttpd:vulnerable'
+
+# env:
+#   REGISTRY: ghcr.io
+#   IMAGE_NAME: ${{ github.repository }}
+#   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  mayhem:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+    ## Optional: login if your image is private
+    #   - name: Login to Dockerhub
+    #     uses: docker/login-action@v3
+    #     with:
+    #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    #   - name: Login to GHCR
+    #     uses: docker/login-action@v3
+    #     with:
+    #       registry: ${{ env.REGISTRY }}
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pull the github input image or use the default
+      - name: Pull the image
+        run: docker pull ${{ github.event.inputs.docker_image }}
+
+      - name: Run Mayhem for Code to check for vulnerabilities
+        id: run-mayhem
+        uses: ForAllSecure/mcode-action@v1
+        with:
+          mayhem-url: ${{ secrets.MAYHEM_URL }}
+          mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
+          ## Setup Mayhemfile paths and duration as needed
+          args: --image ${{ github.event.inputs.docker_image }} --file Mayhemfile --duration 60
+          owner: forallsecure  # use your own organization here
+          fail-on-defects: true
+          sarif-output: fuzz_mayhem.sarif
+          coverage-output: coverage
+
+      # Archive SARIF report
+      - name: Archive Mayhem for API SARIF report
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz_mayhem.sarif
+          path: fuzz_mayhem.sarif
+
+      # Only available on Github Enterprise or public repositories
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: fuzz_mayhem.sarif
+          category: Security/SCA

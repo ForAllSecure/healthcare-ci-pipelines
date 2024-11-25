@@ -57,7 +57,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install trivy
 
-
       - name: mdsbom action
         uses: ethan42/mdsbom-action@a2c9192003073408ace2827352e7a40e70896e1e
         with:

@@ -31,27 +31,27 @@ jobs:
           mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
           api-url: ${{ inputs.api_url }}
           api-spec: ${{ inputs.api_spec}}
-          sarif-report: mapi.sarif
-          html-report: mapi.html
+          sarif-report: api_mayhem.sarif
+          html-report: api_mayhem.html
           target: forallsecure/healthcare-ci-pipelines/api
 
       # Archive HTML report
       - name: Archive Mayhem for API report
         uses: actions/upload-artifact@v4
         with:
-          name: mapi.html
-          path: mapi.html
+          name: api_mayhem.html
+          path: api_mayhem.html
 
       # Archive SARIF report
       - name: Archive Mayhem for API SARIF report
         uses: actions/upload-artifact@v4
         with:
-          name: mapi.sarif
-          path: mapi.sarif
+          name: api_mayhem.sarif
+          path: api_mayhem.sarif
 
       # Only available on Github Enterprise or public repositories
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: mapi.sarif
+          sarif_file: api_mayhem.sarif
           category: Security/SCA
