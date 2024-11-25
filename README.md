@@ -47,7 +47,7 @@ Foundation’s [Open Compliance Program](https://compliance.linuxfoundation.org)
 ISO-approved standard ([SPDX specification documentation](https://spdx.dev)).
 [SPDX 2.3](https://spdx.github.io/spdx-spec/v2.3/) is currently the latest ISO approved version
 that is widely supported by tooling in the community (version 3 was released in 2024 and once it
-becomes more popular we will upgrade this repo as well). SCM systems like GitHub support it as
+becomes more popular we are excited to upgrade this repo as well). SCM systems like GitHub support it as
 a native SBOM format.
 
 **Static Analysis Results Interchange Format (SARIF)**. SARIF is a standard, JSON-based format for the

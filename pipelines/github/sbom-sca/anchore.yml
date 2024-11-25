@@ -1,0 +1,81 @@
+## Scan a docker image -> get a SARIF/SBOM report based on
+## what is actually referenced at runtime.
+
+name: Static SBOM/SCA with Anchore
+
+on:
+  workflow_dispatch:
+    inputs:
+        docker_image:
+          description: 'The Docker image to scan'
+          required: true
+          default: 'appsecco/dvna:sqlite'
+
+# env:
+#   REGISTRY: ghcr.io
+#   IMAGE_NAME: ${{ github.repository }}
+#   SHA: ${{ github.event.pull_request.head.sha || github.event.after }}
+
+jobs:
+  mdsbom:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+    ## Optional: login if your image is private
+    #   - name: Login to Dockerhub
+    #     uses: docker/login-action@v3
+    #     with:
+    #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    #   - name: Login to GHCR
+    #     uses: docker/login-action@v3
+    #     with:
+    #       registry: ${{ env.REGISTRY }}
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pull the github input image or use the default
+      - name: Pull the image
+        run: docker pull ${{ github.event.inputs.docker_image }}
+
+      - name: Run the Anchore Grype scan action
+        uses: anchore/scan-action@v4
+        id: scan
+        with:
+          image: ${{ github.event.inputs.docker_image }}
+          fail-build: false
+          only-fixed: true
+          output-format: sarif
+          #severity-cutoff: critical
+
+      - name: Run the Anchore Syft sbom action
+        uses: anchore/sbom-action@v0
+        id: syft
+        with:
+          image: ${{ github.event.inputs.docker_image }}
+          format: spdx-json
+          output-file: sbom_anchore.spdx.json
+          upload-artifact: false
+
+      - name: Upload SBOM file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom_anchore.spdx.json
+          path: sbom_anchore.spdx.json
+
+      - name: Upload CyloneDX SCA report as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca_anchore.cyclonedx.json
+          path: sca_anchore.cyclonedx.json
+
+      - name: SBOM upload
+        uses: advanced-security/spdx-dependency-submission-action@v0.1.1

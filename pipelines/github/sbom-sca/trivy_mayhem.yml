@@ -1,0 +1,90 @@
+## Scan a docker image -> get a SARIF/SBOM report
+
+name: Dynamic SBOM/SCA with Trivy + Mayhem
+
+on:
+  workflow_dispatch:
+    inputs:
+        docker_image:
+          description: 'The Docker image to scan'
+          required: true
+          default: 'appsecco/dvna:sqlite'
+
+# env:
+#   REGISTRY: ghcr.io
+#   IMAGE_NAME: ${{ github.repository }}
+#   SHA: ${{ github.event.pull_request.head.sha || github.event.after }}
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+    ## Optional: login if your image is private
+    #   - name: Login to Dockerhub
+    #     uses: docker/login-action@v3
+    #     with:
+    #       username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #       password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    #   - name: Login to GHCR
+    #     uses: docker/login-action@v3
+    #     with:
+    #       registry: ${{ env.REGISTRY }}
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pull the github input image or use the default
+      - name: Pull the image
+        run: docker pull ${{ github.event.inputs.docker_image }}
+
+      - name: Install umoci
+        run: |
+          sudo apt update && sudo apt install -y golang-go wget && wget https://github.com/opencontainers/umoci/releases/download/v0.4.7/umoci.amd64 -O umoci && chmod +x umoci && sudo mv umoci /usr/local/bin/
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get install wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
+
+
+      - name: mdsbom action
+        uses: ethan42/mdsbom-action@a2c9192003073408ace2827352e7a40e70896e1e
+        with:
+          workspace: forallsecure
+          mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
+
+      - name: Run software package for 10 seconds
+        run: timeout -s 9 10 docker run -i ${{ github.event.inputs.docker_image }} || true
+
+      - name: Pause to let mdsbom sync state
+        run: sleep 30
+
+      - name: Generate Dynamic SBOM/SCA reports
+        run: |
+          mdsbom trivy ${{ github.event.inputs.docker_image }} \
+          --workspace forallsecure \
+          --sca-summary-csv dynamic_sca_trivy.csv \
+          --sbom-summary-csv dynamic_sbom_trivy.csv
+
+      - name: Upload SCA file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dynamic_sca_trivy.csv
+          path: dynamic_sca_trivy.csv
+
+      - name: Upload SBOM file as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dynamic_sca_trivy.csv
+          path: dynamic_sca_trivy.csv
