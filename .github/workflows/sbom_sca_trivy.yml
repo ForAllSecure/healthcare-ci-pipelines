@@ -46,18 +46,18 @@ jobs:
         run: docker pull ${{ github.event.inputs.docker_image }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: ${{ github.event.inputs.docker_image }}
-          format: 'sarif'
-          output: sca_trivy.sarif
+          format: 'json'
+          output: sca_trivy.json
           #exit-code: '1'
-          ignore-unfixed: true
+          #ignore-unfixed: true
           # severity: 'CRITICAL,HIGH'
           scanners: 'vuln'
 
       - name: Run Trivy SBOM scanner
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: ${{ github.event.inputs.docker_image }}
           format: 'spdx-json'
