@@ -66,8 +66,8 @@ jobs:
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sca_trivy.sarif
-          path: sca_trivy.sarif
+          name: sca_trivy.json
+          path: sca_trivy.json
 
       - name: Upload SARIF file as an artifact
         uses: actions/upload-artifact@v4
@@ -76,11 +76,11 @@ jobs:
           path: sca_trivy.spdx.json
 
       # Only available on Github Enterprise or public repositories
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: sca_trivy.sarif
-          category: Security/SCA
+      # - name: Upload SARIF file
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: sca_trivy.sarif
+      #     category: Security/SCA
 
       - name: SBOM upload
         uses: advanced-security/spdx-dependency-submission-action@v0.1.1
